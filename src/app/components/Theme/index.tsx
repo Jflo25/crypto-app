@@ -1,29 +1,29 @@
-import { createContext, useState, useContext, ReactNode } from 'react';
+"use client";
 
-//must indicate a default theme value along with function 
-const ThemeContext = createContext({
-   theme: 'light', // Default theme value
-   toggleTheme: () => { } // Default function, which does nothing initially
-});
+import React from "react";
+import { useTheme } from "next-themes";
+import SunIcon from "@/public/SunIcon.svg";
+import MoonIcon from "@/public/MoonIcon.svg";
 
-// Create custom hook to access the context 
-export const ToggleTheme = () => useContext(ThemeContext);
+const ThemeToggle = () => {
+  const { theme, setTheme } = useTheme();
 
-//Defining the type of react children 
-type ThemeProviderProps = {
-   children: ReactNode;
+  const handleThemeChange = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  return (
+    <button
+      onClick={handleThemeChange}
+      className="w-[45px] h-[45px] bg-black rounded-xl text-white flex items-center justify-center cursor-pointer"
+    >
+      {theme === "dark" ? (
+        <SunIcon className="h-6 w-6" />
+      ) : (
+        <MoonIcon className="h-6 w-6" />
+      )}
+    </button>
+  );
 };
 
-export const ThemeProvider = ({ children }: ThemeProviderProps) => {
-   const [theme, setTheme] = useState('light');
-
-   const toggleTheme = () => {
-      setTheme((defaultTheme) => defaultTheme === "dark" ? "light" : "dark");
-   }
-
-   return (
-      <ThemeContext.Provider value={{ theme, toggleTheme }}>
-         {children}
-      </ThemeContext.Provider>
-   );
-};
+export default ThemeToggle;

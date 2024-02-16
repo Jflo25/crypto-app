@@ -1,8 +1,13 @@
-import Navbar from "./components/Navbar";
+"use client";
+import { useEffect } from "react";
+import Navbar from "./components/Navbar/Index";
+import { ThemeProvider } from "next-themes";
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <Navbar />
-    </main>
+    <ThemeProvider>
+      <div>
+        <Navbar />
+      </div>
+    </ThemeProvider>
   );
 }
