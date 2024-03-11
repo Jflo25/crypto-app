@@ -2,157 +2,133 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Sparklines, SparklinesLine } from "react-sparklines";
 import { Coin } from "../CoinType"; // Make sure this path is correct
+import CoinMarketBar from "../CoinBar";
 
-const CoinTable = ({ coinId = "bitcoin" }) => {
-  // Allow passing a coin ID as a prop, default to 'bitcoin'
-  const [coin, setCoin] = useState<Coin | null>(null);
+const CoinTable = () => {
+  const [coins, setCoins] = useState<Coin[]>([]);
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
-    const fetchCoinData = async () => {
-      // Hardcoded 'bitcoin' as the coin ID for testing
-      const url = `https://api.coingecko.com/api/v3/coins/bitcoin?sparkline=true`;
+    const fetchCoinsData = async () => {
+      const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50`;
       try {
-        const response = await axios.get<Coin>(url);
-        setCoin(response.data);
+        const response = await axios.get<Coin[]>(url);
+        setCoins(response.data);
       } catch (error) {
-        console.error("Failed to fetch coin data:", error);
+        console.error("Failed to fetch coins data:", error);
       }
     };
 
-    fetchCoinData(); // No longer passing coinId since it's hardcoded
-  }, []); // The empty dependency array ensures this effect runs once after initial render
+    fetchCoinsData();
+  }, []);
 
+  const filteredCoins = coins.filter(
+    (coin) =>
+      coin.name.toLowerCase().includes(search.toLowerCase()) ||
+      coin.symbol.toLowerCase().includes(search.toLowerCase())
+  );
   // Early return if coin data is not yet fetched
-  if (!coin) {
+  if (!coins) {
     return <div>Loading...</div>;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="Coin-Name text-2xl font-semibold mb-6 text-center">
-        {coin.name}
-      </h2>
-
-      <div className="rows-container flex flex-col mx-auto w-full">
-        <div className="Coin-info bg-[#1d1f47] rounded-xl flex items-center w-full py-5 justify-center flex-col md:flex-row">
-          <div className="relative ">
-            <div className="coin-ranking absolute bottom-10 h-7 w-16 flex justify-center items-center transform -translate-x-2/3 md:-top-0 md:left-auto bg-purple-500 text-white px-3 py-2 rounded-md shadow-lg">
-              <p className="whitespace-nowrap">Rank #{coin.market_cap_rank}</p>
-            </div>
-            <span className="Coin-heading">
-              {coin.image ? (
-                <img className="h-[50px]" src={coin.image.small} alt="" />
-              ) : null}
-            </span>
-          </div>
-
-          <div className="coin-symbol-and-price text-center mt-2 md:mt-0 md:ml-4 flex flex-col">
-            {coin.symbol ? (
-              <p className="mb-0">({coin.symbol.toUpperCase()}/USD)</p>
-            ) : null}
-            <div className="coin-price text-lg">
-              {coin.market_data?.current_price ? (
-                <h1 className="mb-0">
-                  ${coin.market_data.current_price.usd.toLocaleString()}
-                </h1>
-              ) : null}
-            </div>
-          </div>
-          <div className="graph w-72 mt-5 text-xs">
-            <p className="text-right">7day</p>
-            {/* <Sparklines data={coin.market_data?.sparkline_7d.price}>
-              <SparklinesLine color="teal" />
-            </Sparklines> */}
-          </div>
-        </div>
-
-        <div className="price-change flex flex-col my-5 bg-[#1d1f47] rounded-xl">
-          <div className="text-center py-5">
-            <h3 className="text-lg text-cyan-200">Market Status</h3>
-          </div>
-
-          <div className="price-change-row flex justify-around mb-2">
-            <div>
-              <p>
-                24h:
-                {coin.market_data?.price_change_percentage_24h &&
-                  coin.market_data.price_change_percentage_24h.toFixed(2)}
-                %
-              </p>
-            </div>
-            <div>
-              <p>
-                7d:
-                {coin.market_data?.price_change_percentage_7d &&
-                  coin.market_data.price_change_percentage_7d.toFixed(2)}
-                %
-              </p>
-            </div>
-          </div>
-          <div className="price-change-row flex justify-around">
-            <div>
-              <p>
-                30d:
-                {coin.market_data?.price_change_percentage_30d &&
-                  coin.market_data.price_change_percentage_30d.toFixed(2)}
-                %
-              </p>
-            </div>
-            <div>
-              <p>
-                1y:
-                {coin.market_data?.price_change_percentage_1y &&
-                  coin.market_data.price_change_percentage_1y.toFixed(2)}
-                %
-              </p>
-            </div>
-          </div>
-
-          <div className="bottom-info py-5 flex-col">
-            <div className="flex justify-around mb-5">
-              <div className="row text-center">
-                <h3>Market Cap</h3>
-                {coin.market_data &&
-                coin.market_data.market_cap &&
-                coin.market_data.market_cap.usd ? (
-                  <p>${coin.market_data.market_cap.usd.toLocaleString()} </p>
-                ) : null}
-              </div>
-
-              <div className="row text-center">
-                <h3>Max Supply</h3>
-                {coin.market_data && coin.market_data.max_supply ? (
-                  <p>{coin.market_data.max_supply.toLocaleString()}</p>
-                ) : null}
-              </div>
-            </div>
-
-            {/* <div className="flex justify-around">
-              <div className="row text-center">
-                <h3>Circulating Supply</h3>
-                {coin.market_data ? (
-                  <p>{coin.market_data.circulating_supply.toLocaleString()}</p>
-                ) : null}
-              </div>
-
-              <div className="row text-center">
-                <h3>Total Volume</h3>
-                {coin.market_data ? (
-                  <p>{coin.market_data.total_volume.usd.toLocaleString()}</p>
-                ) : null}
-              </div>
-            </div> */}
-          </div>
-        </div>
+    <div className="rounded-div my-4 mx-auto">
+      <div className="flex flex-col md:flex-row justify-between pt-4 pb-6 text-center md:text-right">
+        <h1 className="text-2xl font-bold my-2">Search Crypto</h1>
+        <form>
+          <input
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full bg-primary border border-input px-4 py-2 rounded-2xl shadow-xl"
+            type="text"
+            placeholder="Search a coin"
+          />
+        </form>
       </div>
 
-      <div className="body w-full bg-[#1d1f47] rounded-xl my-5">
-        <div className="description p-6">
-          <h3 className="text-center mb-4 text-cyan-200 text-lg">
-            Information:
-          </h3>
-          {/* Place the CoinDescription component or equivalent JSX here */}
+      <div className="Crypto-Table w-full text-center">
+        <div className="bg-black w-full text-sm font-light rounded-2xl pl-5 flex gap-3 mb-2">
+          <span className="px-1">#</span>
+          <span className="px-1 mr-20">Name</span>
+          <span className="w-[6%] px-1">Price</span>
+          <span className="w-[6%] px-1">1h%</span>
+          <span className="w-[6%] px-1">24h%</span>
+          <span className="w-[6%] px-1">7d%</span>
+          <span className="w-full max-w-[20%] px-1">
+            24h volume / Market Cap
+          </span>
+          <span className="w-full max-w-[20%] px-1">
+            Circulating / Total Supply
+          </span>
+          <span>Last 7d</span>
         </div>
+
+        {filteredCoins.map((coin) => (
+          <div
+            key={coin.id}
+            className="bg-gradient-to-r from-black to-gray-900 w-full text-sm font-light rounded-3xl p-5 mb-2 flex gap-3 items-center"
+          >
+            <span>{coin.market_cap_rank}</span>
+            {/* Ensure you have the Image component imported from 'next/image' if using Next.js */}
+            <img src={coin.image} alt={coin.name} className="w-7 h-7" />{" "}
+            {/* Adjust this if using Next.js Image component */}
+            <span className="w-[14%] px-1">
+              {coin.name.charAt(0).toUpperCase() +
+                coin.name.slice(1).toLowerCase()}{" "}
+              ({coin.symbol.toUpperCase()})
+            </span>
+            <span className="w-[6%] px-1">
+              {coin.current_price.toLocaleString()}
+            </span>
+            {/* Replace PriceChange with actual component/logic to display price change */}
+            <span className="w-[6%] px-1">
+              {coin.total_volume.toLocaleString()}
+            </span>
+            <span className="w-[6%] px-1">
+              {coin.price_change_percentage_24h}
+            </span>
+            <span className="w-[6%] px-1">
+              {coin.price_change_percentage_7d}
+            </span>
+            <span className="w-full max-w-[20%] px-1">
+              <div className="flex justify-between text-xs">
+                <span
+                  className={
+                    coin.price_change_percentage_24h > 0
+                      ? "text-[#00B1A7]"
+                      : "text-[#FE2264]"
+                  }
+                >
+                  {coin.total_volume.toLocaleString()}
+                </span>
+                <span
+                  className={
+                    coin.price_change_percentage_24h > 0
+                      ? "text-[#00B1A7]"
+                      : "text-[#FE2264]"
+                  }
+                >
+                  {coin.market_cap.toLocaleString()}
+                </span>
+              </div>
+              {/* Placeholder for CoinMarketBar */}
+            </span>
+            <span className="w-full max-w-[20%] px-1">
+              <div className="flex justify-between text-xs">
+                <CoinMarketBar
+                  fill={
+                    coin.price_change_percentage_24h > 0 ? "#00B1A7" : "#FE2264"
+                  }
+                  percentage={(coin.total_volume / coin.market_cap) * 100} // This is an example calculation
+                />
+              </div>
+              {/* Placeholder for CoinMarketBar */}
+            </span>
+            <span className="w-[14%] pl-3 h-[50px]">
+              {/* Placeholder for PriceCoinGraph */}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );
