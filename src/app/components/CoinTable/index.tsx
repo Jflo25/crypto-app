@@ -1,36 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Sparklines, SparklinesLine } from "react-sparklines";
-import { Coin } from "../CoinType"; // Make sure this path is correct
-import CoinMarketBar from "../CoinBar";
-import { GetServerSideProps } from "next";
+import CoinMarketBar from "../CoinBar"; // Adjust the import path as needed
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "../../../../store/store"; // Adjust the path as needed
+import { fetchCoins } from "../../../../store/coinSlice"; // Adjust the path as needed
+import { Coin } from "../CoinType"; // Adjust path as needed
+interface CoinTableProps {
+  coins: Coin[];
+}
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  // Provide a default empty string to avoid undefined
-  const apiKey = process.env.CG_DEMO_API_KEY || "";
-  // Define request options with appropriate type
-  const options: RequestInit = {
-    method: "GET",
-    headers: {
-      "x-cg-demo-api-key": apiKey,
-    },
-  };
-  const url =
-    "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&sparkline=true&price_change_percentage=1h%2C24h%2C7d";
-
-  try {
-    const response = await fetch(url, options);
-    const data = await response.json();
-    return {
-      props: { coins: data },
-    };
-  } catch (error) {
-    console.error("Failed to fetch coins data:", error);
-    return { props: { coins: [] } };
-  }
-};
-
-const CoinTable = ({ coins }: { coins: Coin[] }) => {
+const CoinTable = ({ coins }: CoinTableProps) => {
+  const dispatch = useDispatch<AppDispatch>();
   const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    dispatch(fetchCoins());
+  }, [dispatch]);
 
   const filteredCoins = coins.filter(
     (coin) =>
@@ -69,7 +54,7 @@ const CoinTable = ({ coins }: { coins: Coin[] }) => {
           <span>Last 7d</span>
         </div>
 
-        {filteredCoins.map((coin) => (
+        {filteredCoins.map((coin: Coin) => (
           <div
             key={coin.id}
             className="bg-gradient-to-r from-black to-gray-900 w-full text-sm font-light rounded-3xl p-5 mb-2 flex gap-3 items-center"

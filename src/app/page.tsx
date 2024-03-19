@@ -1,15 +1,18 @@
 "use client";
-import { useEffect } from "react";
-import Navbar from "./components/Navbar/Index";
-import CoinTable from "./components/CoinTable";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchCoins } from "../../store/coinSlice"; // Adjust based on actual file location
+import Navbar from "./components/Navbar/Index"; // Note: Adjust if the actual import path differs
+import Home from "../app/pages/index"; // Note: Adjust if the actual import path differs
 import { ThemeProvider } from "next-themes";
-export default function Home() {
+import { RootState, AppDispatch } from "../../store/store";
+
+const page = () => {
   return (
-    <ThemeProvider>
-      <div>
-        <Navbar />
-        <CoinTable />
-      </div>
-    </ThemeProvider>
+    <div>
+      <Home />
+    </div>
   );
-}
+};
+
+export default page;

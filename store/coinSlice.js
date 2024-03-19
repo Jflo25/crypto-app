@@ -2,12 +2,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const initialState = {
-  items: [],
-  status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
-  error: null,
-};
-
 // Async thunk for fetching coins data
 export const fetchCoins = createAsyncThunk("coins/fetchCoins", async () => {
   const response = await axios.get(
@@ -15,6 +9,12 @@ export const fetchCoins = createAsyncThunk("coins/fetchCoins", async () => {
   );
   return response.data; // Transform the data here if needed
 });
+
+const initialState = {
+  items: [],
+  status: "idle", // 'idle' | 'loading' | 'succeeded' | 'failed'
+  error: null,
+};
 
 const coinsSlice = createSlice({
   name: "coins",
